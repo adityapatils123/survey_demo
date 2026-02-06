@@ -1,3 +1,27 @@
+---
+title: Survey Demo - Medical Survey Form
+emoji: 📝
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
+# Survey Demo - Medical Survey Form Application
+
+An intelligent voice and text-based survey form application built with Google ADK (Agent Development Kit) and FastAPI.
+
+---
+
+## 🚀 Live Deployment
+
+This application is deployed using **Hugging Face Docker Spaces**.
+
+### Required Environment Variable (Hugging Face Settings → Secrets):
+
+
+
+
 # Survey Demo - Medical Survey Form Application
 
 An intelligent voice and text-based survey form application built with Google ADK (Agent Development Kit) and FastAPI.
@@ -216,3 +240,5 @@ For issues or questions:
 1. Check the application logs
 2. Review the documentation files
 3. Check GitHub issues (if applicable)
+
+-----------
