@@ -1,0 +1,803 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Medical Survey Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon"
+    href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%234f46e5" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>' />
+  <script src="/static/js/form-app.js?v=1" type="module"></script>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --primary-light: #818cf8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    .header-text h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .header-text p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .toggle-btn {
+      padding: 10px 20px;
+      border: 2px solid var(--border);
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+      color: var(--text-muted);
+    }
+
+    .toggle-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .toggle-btn:hover:not(.active) {
+      border-color: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* Main Content */
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 24px;
+    }
+
+    @media (max-width: 968px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Form Card */
+    .form-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .question-number {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      background: rgba(79, 70, 229, 0.1);
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+
+    .question-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .help-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-style: italic;
+    }
+
+    /* Form Controls */
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+    }
+
+    .radio-option:hover {
+      border-color: var(--primary-light);
+      background: rgba(79, 70, 229, 0.02);
+    }
+
+    .radio-option.selected {
+      border-color: var(--primary);
+      background: rgba(79, 70, 229, 0.05);
+    }
+
+    .radio-option input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+
+    .radio-option label {
+      cursor: pointer;
+      font-size: 15px;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .number-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .number-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      flex: 1;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+      margin-top: 12px;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: #059669;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .assistant-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .assistant-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .assistant-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    .assistant-info h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .assistant-status {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .voice-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .voice-btn {
+      padding: 16px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 15px;
+    }
+
+    .voice-btn-start {
+      background: var(--success);
+      color: white;
+    }
+
+    .voice-btn-start:hover {
+      background: #059669;
+      transform: scale(1.02);
+    }
+
+    .voice-btn-stop {
+      background: var(--danger);
+      color: white;
+    }
+
+    .voice-btn-stop:hover {
+      background: #dc2626;
+    }
+
+    .voice-indicator {
+      padding: 16px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 2px solid var(--success);
+      border-radius: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--success);
+      font-weight: 600;
+      display: none;
+    }
+
+    .voice-indicator.active {
+      display: block;
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Progress Card */
+    .progress-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .progress-header {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .progress-bar-container {
+      background: var(--border);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+      transition: width 0.3s;
+      border-radius: 4px;
+    }
+
+    .progress-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .answers-list {
+      margin-top: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .answer-item {
+      padding: 12px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .answer-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .answer-value {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    /* Status Messages */
+    .status-message {
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 24px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status-message.show {
+      display: flex;
+    }
+
+    .status-message.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 2px solid var(--success);
+      color: #065f46;
+    }
+
+    .status-message.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid var(--danger);
+      color: #991b1b;
+    }
+
+    .status-message.info {
+      background: rgba(79, 70, 229, 0.1);
+      border: 2px solid var(--primary);
+      color: #3730a3;
+    }
+
+    /* Completion Screen */
+    .completion-screen {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+
+    .completion-screen.show {
+      display: block;
+    }
+
+    .completion-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 40px;
+      color: white;
+    }
+
+    .completion-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .completion-message {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    /* Survey Progress Panel */
+    .toggle-progress-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .toggle-progress-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .survey-progress-container {
+      margin-top: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--bg);
+    }
+
+    .progress-questions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .progress-question-item {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      transition: all 0.2s;
+    }
+
+    .progress-question-item.current {
+      border-color: var(--primary);
+      background: rgba(79, 70, 229, 0.05);
+    }
+
+    .progress-question-item.answered {
+      border-color: var(--success);
+    }
+
+    .progress-question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .progress-question-step {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      background: rgba(79, 70, 229, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-right: 8px;
+    }
+
+    .progress-question-step.current {
+      background: var(--primary);
+      color: white;
+    }
+
+    .progress-question-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+      line-height: 1.4;
+    }
+
+    .progress-question-options {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .progress-option {
+      display: flex;
+      align-items: center;
+      padding: 6px 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .progress-option:hover {
+      background: rgba(79, 70, 229, 0.1);
+    }
+
+    .progress-option.selected {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid var(--success);
+      font-weight: 600;
+    }
+
+    .progress-option input[type="radio"],
+    .progress-option input[type="checkbox"] {
+      margin-right: 8px;
+      cursor: pointer;
+    }
+
+    .progress-edit-btn {
+      background: var(--primary-light);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+
+    .progress-edit-btn:hover {
+      background: var(--primary);
+    }
+
+    .progress-answer-display {
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .progress-answer-display strong {
+      color: var(--success);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-title">
+        <div class="header-icon">📋</div>
+        <div class="header-text">
+          <h1>Otezla Chart Audit Survey</h1>
+          <p>Plaque Psoriasis Treatment Study</p>
+        </div>
+      </div>
+      <div class="mode-toggle">
+        <button class="toggle-btn active" id="manualModeBtn">✍️ Manual</button>
+        <button class="toggle-btn" id="voiceModeBtn">🎤 Voice Assistant</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- Form Section -->
+      <div class="form-card">
+        <div id="statusMessage" class="status-message"></div>
+
+        <div id="formContent">
+          <div class="question-header">
+            <span class="question-number" id="questionNumber">Question 1</span>
+          </div>
+
+          <h2 class="question-text" id="questionText">Loading question...</h2>
+          <p class="help-text" id="helpText"></p>
+
+          <div class="form-group" id="formGroup">
+            <!-- Dynamic form controls will be inserted here -->
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-secondary" id="backBtn" disabled>← Back</button>
+            <button class="btn btn-primary" id="nextBtn">Next →</button>
+          </div>
+        </div>
+
+        <div id="completionScreen" class="completion-screen">
+          <div class="completion-icon">✓</div>
+          <h2 class="completion-title">Survey Completed!</h2>
+          <p class="completion-message">Thank you for your participation. Your responses have been recorded.</p>
+          <div style="display: flex; flex-direction: column; gap: 12px; max-width: 300px; margin: 0 auto;">
+            <button class="btn btn-primary" onclick="location.reload()">Start New Survey</button>
+            <button class="btn btn-success" id="downloadBtn">📥 Download Survey Results</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Assistant Card -->
+        <div class="assistant-card">
+          <div class="assistant-header">
+            <div class="assistant-avatar">🤖</div>
+            <div class="assistant-info">
+              <h3>AI Assistant</h3>
+              <div class="assistant-status">
+                <span class="status-dot"></span>
+                <span id="assistantStatus">Ready to help</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="voice-controls">
+            <button class="voice-btn voice-btn-start" id="startVoiceBtn">
+              <span>🎙️</span>
+              <span>Start Voice Mode</span>
+            </button>
+            <button class="voice-btn voice-btn-stop" id="stopVoiceBtn" style="display: none;">
+              <span>⏹️</span>
+              <span>Stop Voice Mode</span>
+            </button>
+            <div class="voice-indicator" id="voiceIndicator">
+              🎤 Listening...
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Card -->
+        <div class="progress-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 class="progress-header" style="margin: 0;">Survey Progress</h3>
+            <button class="toggle-progress-btn" id="toggleProgressBtn" title="Expand/Collapse">▼</button>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+          </div>
+          <p class="progress-text" id="progressText">0 questions answered</p>
+
+          <div class="survey-progress-container" id="surveyProgressContainer" style="display: none;">
+            <div class="progress-questions-list" id="progressQuestionsList">
+              <!-- All questions with options will appear here -->
+            </div>
+          </div>
+
+          <div class="answers-list" id="answersList">
+            <!-- Recent answers will appear here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

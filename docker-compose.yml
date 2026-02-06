@@ -1,0 +1,44 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.8'
+
+services:
+  survey-demo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: survey-demo
+    ports:
+      - "${PORT:-7860}:7860"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PORT=7860
+      - HOST=0.0.0.0
+    volumes:
+      # Persist database data
+      - survey_data:/app/data
+      # Optional: Mount database file for easier access
+      - ./survey_sessions.db:/app/survey_sessions.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.connect(('localhost', 7860)); s.close()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  survey_data:
+    driver: local
