@@ -1053,11 +1053,16 @@ function stopVoiceMode() {
 }
 
 function connectVoiceWebSocket() {
-    const wsUrl = `ws://${window.location.host}/ws/form/${state.sessionId}?is_audio=true`;
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const wsUrl = `${protocol}://${window.location.host}/ws/form/${state.sessionId}?is_audio=true`;
+
+    console.log("[VOICE] Connecting to:", wsUrl);
+
     state.websocket = new WebSocket(wsUrl);
 
     state.websocket.onopen = () => {
         console.log('[VOICE] WebSocket connected');
+
         // SEND HANDSHAKE with current state (including step_history for back-support)
         const handshake = {
             type: "handshake",
@@ -1067,18 +1072,6 @@ function connectVoiceWebSocket() {
         };
         state.websocket.send(JSON.stringify(handshake));
         console.log('[VOICE] Sent handshake:', handshake);
-        
-        // Trigger the agent to start speaking naturally
-        // This ensures the agent greets and reads the current question immediately upon connection.
-        setTimeout(() => {
-            if (state.isVoiceActive && state.websocket && state.websocket.readyState === WebSocket.OPEN) {
-                // Send a natural message to prompt the agent to greet and check the current question
-                state.websocket.send(JSON.stringify({
-                    mime_type: 'text/plain',
-                    data: 'Hi! I\'m ready to help you complete this survey. Let\'s get started.'
-                }));
-            }
-        }, 500);
     };
 
     state.websocket.onmessage = (event) => {
@@ -1094,6 +1087,7 @@ function connectVoiceWebSocket() {
         console.error('[VOICE] WebSocket error:', error);
     };
 }
+
 
 function handleVoiceMessage(message) {
     console.log('[VOICE] Received:', message);
